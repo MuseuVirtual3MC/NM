@@ -1,0 +1,766 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Museu Virtual 3MC</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;0,800;1,500;1,600&family=Hanken+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  color-scheme:dark;
+  --wall:#1C120D; --wall2:#2B1B13; --pale:#F4EBDD; --pale-edge:#D9C3A0; --pale-card:#FFFBF2; --ink:#2A1710; --ink-soft:#6B5242;
+  --txt:#F6EDE0; --muted:#CDB9A3; --brass:#D9A22E; --brass-soft:#F2C55C; --rose:#C23B22; --frame:#0F0A07;
+  --head:'Playfair Display',Georgia,'Times New Roman',serif;
+  --body:'Hanken Grotesk','Segoe UI',Arial,sans-serif;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:70px}
+body{margin:0;background:var(--wall);color:var(--txt);font-family:var(--body);font-size:1.08rem;line-height:1.7}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+h1,h2,h3{font-family:var(--head);margin:0;line-height:1.1}
+a{color:inherit}
+a:focus-visible,summary:focus-visible{outline:3px solid var(--brass-soft);outline-offset:3px}
+
+/* barra de navegação */
+nav{position:sticky;top:0;z-index:5;background:var(--frame);border-bottom:1px solid var(--brass);display:flex;gap:1.3rem;align-items:center;padding:.8rem 1.2rem;overflow-x:auto;white-space:nowrap}
+nav b{font-family:var(--head);font-weight:600;color:var(--brass-soft);margin-right:auto;font-size:1.1rem}
+nav a{font-family:var(--head);font-weight:600;font-size:1rem;color:var(--txt);text-decoration:none}
+nav a:hover{color:var(--brass-soft)}
+
+/* entrada do museu */
+.hero{position:relative;overflow:hidden;padding:4.5rem 1.2rem 5.5rem;text-align:center;
+  background:
+   radial-gradient(ellipse 60% 70% at 50% 0%,rgba(242,197,92,.34),transparent 70%),
+   linear-gradient(var(--wall),#0F0A07)}
+.hero::after{content:"";position:absolute;left:0;right:0;bottom:0;height:18px;background:var(--frame);border-top:3px solid var(--brass)}
+.hero .door{position:relative;max-width:820px;margin:0 auto;padding:3rem 1.5rem 3.2rem;border:1px solid var(--brass);outline:1px solid rgba(217,162,46,.45);outline-offset:10px}
+.hero .tag{font-family:var(--head);font-style:italic;margin:0 0 1.2rem;color:var(--brass-soft);font-size:1.05rem}
+.hero h1{font-weight:700;font-size:clamp(2.5rem,9vw,5.4rem);letter-spacing:-.02em}
+.hero h1 span{display:block;font-style:italic;font-weight:400;color:var(--brass-soft);margin-top:.15em}
+.hero .sub{font-family:var(--head);max-width:40ch;margin:1.6rem auto 2rem;font-size:1.2rem;color:var(--txt)}
+.btn{font-family:var(--head);display:inline-block;background:var(--brass);color:#1A0F08;font-weight:700;padding:.8rem 1.5rem;border-radius:4px;text-decoration:none}
+.btn:hover{background:var(--brass-soft)}
+
+/* salas */
+.room{position:relative;padding:4.5rem 1.5rem 5rem}
+.room::after{content:"";position:absolute;left:0;right:0;bottom:0;height:14px;background:var(--frame);border-top:2px solid var(--brass)}
+.room.dark{background:linear-gradient(var(--wall),#120B08)}
+.room.light{background:var(--pale);color:var(--ink)}
+.room.light::after{background:var(--pale-edge);border-top-color:var(--brass)}
+.wrap{max-width:1000px;margin:0 auto}
+.room-grid{display:grid;gap:2.2rem 3rem;grid-template-columns:minmax(0,1fr)}
+@media (min-width:860px){.room-grid{grid-template-columns:260px minmax(0,1fr);align-items:start}.plaque{position:static}}
+
+/* placa de parede */
+.plaque{border:1px solid var(--brass);padding:1.2rem 1.3rem 1.4rem;background:rgba(15,10,7,.55)}
+.light .plaque{background:var(--pale-card);border-color:var(--brass)}
+.plaque .room-no{margin:0 0 .6rem;font-size:.95rem;color:var(--brass-soft);font-weight:600}
+.light .plaque .room-no{color:#A3301B}
+.plaque h2{font-size:clamp(1.8rem,4.5vw,2.3rem);font-weight:700;overflow-wrap:break-word;hyphens:auto}
+#equipe .plaque h2{font-size:clamp(1.5rem,4.5vw,1.6rem)}
+
+.exhibit p{max-width:62ch;margin:0 0 1rem}
+.exhibit > p:first-child{font-size:1.18rem}
+.light .exhibit p{color:var(--ink)}
+
+/* textos de apoio (etiquetas) */
+.two{display:grid;gap:1.6rem;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));margin-top:1.8rem}
+.label{border-top:3px solid var(--brass);padding-top:.8rem}
+.label h3{font-size:1.3rem;margin-bottom:.4rem}
+.label p{margin:0;font-size:1rem}
+
+/* molduras e espaços de foto */
+.gallery{display:grid;gap:1.6rem;margin-top:1.8rem;grid-template-columns:repeat(auto-fill,minmax(220px,1fr))}
+.gallery figure{margin:0}
+.frame{background:var(--frame);padding:10px;border:1px solid var(--brass);box-shadow:0 14px 28px rgba(0,0,0,.35)}
+.light .frame{box-shadow:0 14px 26px rgba(42,23,16,.25)}
+.mat{background:#F6F3EC;padding:12px}
+.slot{display:flex;align-items:center;justify-content:center;text-align:center;color:var(--ink-soft);
+  background:radial-gradient(ellipse at 50% 0%,#fff,#EADFCB);border:1px dashed #B9A27E;aspect-ratio:4/3;padding:1rem;font-weight:500;font-size:.98rem}
+.frame img,.frame video,.frame iframe{display:block;width:100%;height:auto}
+.gallery figcaption{margin:.9rem auto 0;width:fit-content;max-width:100%;border:1px solid var(--brass);padding:.25rem .8rem;font-size:.88rem;background:rgba(15,10,7,.55);color:var(--txt);text-align:center}
+.light .gallery figcaption{background:var(--pale-card);color:var(--ink)}
+.screen{margin-top:1.4rem}
+.screen .slot{aspect-ratio:16/9;background:radial-gradient(ellipse at 50% 0%,#4A2A1C,#0F0A07);color:var(--muted);border:1px dashed var(--brass)}
+
+/* perguntas como índice de catálogo */
+.exhibit h3.sub-h{font-size:1.5rem;margin:2.8rem 0 .6rem}
+details{border-bottom:1px solid rgba(217,162,46,.5);padding:.9rem 0}
+summary{cursor:pointer;font-family:var(--head);font-weight:600;font-size:1.12rem}
+details ul{margin:.8rem 0 0;padding-left:1.2rem;max-width:62ch}
+details li{margin-bottom:.4rem}
+
+/* citações na parede */
+.quotes{display:grid;gap:2.2rem;margin-top:1.6rem}
+.quotes figure{margin:0;padding-left:1.4rem;border-left:3px solid var(--brass)}
+.quotes blockquote{margin:0 0 .8rem;font-family:var(--head);font-style:italic;font-size:clamp(1.3rem,3.4vw,1.8rem);line-height:1.35}
+.quotes figcaption{display:inline-block;border:1px solid var(--brass);padding:.25rem .8rem;font-size:.88rem;color:var(--muted)}
+
+
+/* linha do tempo */
+.timeline{list-style:none;margin:1.6rem 0 0;padding:0 0 0 1.6rem;border-left:3px solid var(--brass)}
+.timeline li{position:relative;padding:0 0 2rem 1rem}
+.timeline li:last-child{padding-bottom:0}
+.timeline li::before{content:"";position:absolute;left:calc(-1.6rem - 9px);top:.55rem;width:15px;height:15px;border-radius:50%;background:var(--wall);border:3px solid var(--brass-soft)}
+.timeline .year{display:inline-block;font-family:var(--head);font-weight:700;font-size:1.5rem;color:var(--brass-soft);line-height:1.2}
+.timeline h3{font-size:1.25rem;margin:.1rem 0 .3rem}
+.timeline p{margin:0;max-width:56ch;font-size:1.02rem}
+
+/* créditos */
+.school{font-family:var(--head);font-weight:700;font-size:1.5rem;color:var(--ink);margin:0 0 1.4rem}
+.credits h3{font-size:1.2rem;margin:1.6rem 0 .7rem}
+.team{list-style:none;margin:0;padding:0;display:grid;gap:.6rem 1.2rem;grid-template-columns:repeat(auto-fit,minmax(200px,1fr))}
+.team li{border-bottom:1px solid var(--brass);padding:.35rem 0;font-family:var(--head);font-weight:600;font-size:1.15rem;color:var(--ink)}
+@media (max-width:600px){
+  .team{grid-template-columns:repeat(2,1fr);gap:.5rem .8rem}
+  .team li{font-size:1rem}
+  .hero .door{outline-offset:6px}
+}
+
+/* saída */
+footer{background:var(--frame);color:var(--txt);text-align:center;padding:3rem 1.5rem;border-top:3px solid var(--brass)}
+footer .thanks{font-family:var(--head);font-size:1.6rem;font-weight:600;color:var(--brass-soft);display:block;margin-bottom:.5rem}
+footer small{display:block;margin-top:.5rem;color:var(--muted);font-size:.95rem}
+
+/* toque de museu */
+nav b{text-transform:uppercase;letter-spacing:.12em;font-size:1rem}
+.hero .door{border-radius:160px 160px 0 0;padding-top:4rem}
+.hero .door::before{content:"";display:block;width:56px;height:3px;background:var(--brass);margin:0 auto 1.6rem;border-radius:2px}
+.hero h1{text-shadow:0 0 40px rgba(242,197,92,.25)}
+.room::before{content:"";position:absolute;left:0;right:0;top:0;height:4px;background:linear-gradient(90deg,transparent,var(--brass),transparent)}
+.room.dark{background:radial-gradient(ellipse 55% 45% at 50% 0%,rgba(242,197,92,.16),transparent 70%),linear-gradient(var(--wall),#120B08)}
+.room.light{background:radial-gradient(ellipse 55% 40% at 50% 0%,rgba(255,255,255,.45),transparent 70%),var(--pale)}
+.plaque{outline:1px solid rgba(217,162,46,.45);outline-offset:5px;box-shadow:0 10px 24px rgba(0,0,0,.22)}
+.plaque .room-no{text-transform:uppercase;letter-spacing:.18em;font-size:.8rem}
+.plaque h2::after{content:"";display:block;width:42px;height:2px;background:var(--brass);margin-top:.9rem}
+.frame{box-shadow:0 18px 32px rgba(0,0,0,.4)}
+@media (max-width:600px){.hero .door{border-radius:110px 110px 0 0}}
+
+/* ===== versão galeria ===== */
+::selection{background:var(--brass);color:#1A0F08}
+#prog{position:fixed;top:0;left:0;height:3px;width:0;background:linear-gradient(90deg,var(--brass),var(--brass-soft));z-index:9}
+nav a{padding:.2rem 0;border-bottom:2px solid transparent;transition:color .2s,border-color .2s}
+nav a.active{color:var(--brass-soft);border-bottom-color:var(--brass-soft)}
+.hero::before{content:"";position:absolute;left:50%;top:0;width:min(1100px,140%);height:100%;transform:translateX(-50%);pointer-events:none;background:conic-gradient(from 180deg at 50% 0%,transparent 158deg,rgba(242,197,92,.16) 180deg,transparent 202deg)}
+.hero::after{height:34px;background:repeating-conic-gradient(var(--frame) 0 25%,#2B1B13 0 50%) 0 0/34px 34px;border-top:3px solid var(--brass)}
+.hero .door{box-shadow:0 0 80px rgba(242,197,92,.12),inset 0 0 60px rgba(0,0,0,.35)}
+.hero .tag{text-transform:uppercase;letter-spacing:.22em;font-size:.82rem;font-style:normal}
+.hero .tag::before,.hero .tag::after{content:"";display:inline-block;width:36px;height:1px;background:var(--brass);vertical-align:middle;margin:0 .8rem}
+.hero .hours{margin:1.4rem 0 0;font-size:.78rem;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+.btn{transition:transform .25s,box-shadow .25s,background .25s}
+.btn:hover{transform:translateY(-2px);box-shadow:0 8px 22px rgba(217,162,46,.4)}
+.room.dark{background:radial-gradient(ellipse 55% 45% at 50% 0%,rgba(242,197,92,.16),transparent 70%),repeating-linear-gradient(90deg,rgba(255,255,255,.018) 0 2px,transparent 2px 120px),linear-gradient(var(--wall),#120B08)}
+.room.light{background:radial-gradient(ellipse 55% 40% at 50% 0%,rgba(255,255,255,.45),transparent 70%),repeating-linear-gradient(90deg,rgba(42,23,16,.04) 0 2px,transparent 2px 120px),var(--pale)}
+.room::after{height:18px;background:repeating-conic-gradient(var(--frame) 0 25%,#2B1B13 0 50%) 0 0/18px 18px;border-top:3px solid var(--brass)}
+.room.light::after{background:repeating-conic-gradient(#D9C3A0 0 25%,#C9AE7E 0 50%) 0 0/18px 18px}
+.plaque{position:relative}
+.plaque::before{content:"";position:absolute;inset:7px;pointer-events:none;background:radial-gradient(circle at 3px 3px,var(--brass) 1.6px,transparent 2.2px),radial-gradient(circle at calc(100% - 3px) 3px,var(--brass) 1.6px,transparent 2.2px),radial-gradient(circle at 3px calc(100% - 3px),var(--brass) 1.6px,transparent 2.2px),radial-gradient(circle at calc(100% - 3px) calc(100% - 3px),var(--brass) 1.6px,transparent 2.2px)}
+.frame{transition:transform .35s,box-shadow .35s}
+@media (hover:hover){.frame:hover{transform:translateY(-5px);box-shadow:0 22px 40px rgba(0,0,0,.45),0 0 0 1px var(--brass-soft)}}
+.timeline li::before{box-shadow:0 0 14px rgba(242,197,92,.6)}
+.js .reveal{opacity:0;transform:translateY(26px);transition:opacity .8s ease,transform .8s ease}
+.js .reveal.in{opacity:1;transform:none}
+@media (prefers-reduced-motion:reduce){.js .reveal{opacity:1;transform:none;transition:none}}
+
+/* ===== acabamento final ===== */
+nav b{font-size:1.2rem;font-weight:700}
+nav a{font-size:1.12rem}
+.hero h1{font-size:clamp(2.9rem,10vw,6.2rem);line-height:1.02;letter-spacing:-.01em}
+.hero h1 span{font-weight:500}
+.hero .tag,.hero .hours{font-family:var(--body);font-weight:600}
+.hero .sub{font-size:1.45rem;line-height:1.35}
+.btn{font-size:1.15rem;letter-spacing:.03em}
+.plaque h2{font-size:clamp(2rem,4.5vw,2.6rem)}
+#equipe .plaque h2{font-size:clamp(1.7rem,4.5vw,1.85rem)}
+.label h3,.timeline h3{font-size:1.5rem}
+.timeline .year{font-size:1.75rem}
+
+/* ===== versão apresentação: Oyá, vermelho, ouro e marfim ===== */
+:root{--oya:#C23B22}
+body{font-size:1.2rem}
+nav b{font-size:1.1rem;letter-spacing:.1em}
+nav a{font-size:1rem}
+.hero{min-height:100vh;display:flex;align-items:center;justify-content:center;
+  background:radial-gradient(ellipse 70% 60% at 50% 0%,rgba(194,59,34,.5),transparent 70%),radial-gradient(ellipse 60% 40% at 50% 100%,rgba(242,197,92,.14),transparent 70%),linear-gradient(#1F0E09,#0F0A07)}
+.hero .door{width:100%;border-color:var(--brass)}
+.hero h1{font-size:clamp(2.6rem,9vw,5.4rem);font-weight:800;line-height:1.05}
+.hero h1 span{font-weight:600;color:var(--brass-soft)}
+.hero .sub{font-size:1.35rem;line-height:1.4}
+.hero::after,.room::after{height:18px;border-top:0;background:conic-gradient(from -45deg at 50% 100%,var(--brass) 0 90deg,transparent 0) 0 0/36px 18px,var(--oya)}
+.hero::after{height:24px;background-size:48px 24px,auto}
+.room.light::after{background:conic-gradient(from -45deg at 50% 100%,var(--brass) 0 90deg,transparent 0) 0 0/36px 18px,var(--oya)}
+.room{min-height:100vh;display:flex;align-items:center;padding-bottom:5.5rem}
+.wrap{width:100%}
+.room.dark{background:radial-gradient(ellipse 55% 45% at 50% 0%,rgba(194,59,34,.2),transparent 70%),repeating-linear-gradient(90deg,rgba(255,255,255,.02) 0 2px,transparent 2px 120px),linear-gradient(#1C120D,#120B08)}
+#cortejo,#linha{background:radial-gradient(ellipse 55% 45% at 50% 0%,rgba(242,197,92,.18),transparent 70%),repeating-linear-gradient(90deg,rgba(255,255,255,.03) 0 2px,transparent 2px 120px),linear-gradient(#4A1210,#2A0A08)}
+.room.light{background:radial-gradient(ellipse 55% 40% at 50% 0%,rgba(255,255,255,.6),transparent 70%),repeating-linear-gradient(90deg,rgba(42,23,16,.035) 0 2px,transparent 2px 120px),var(--pale)}
+.plaque{border-top:5px solid var(--oya)}
+.plaque h2{font-size:clamp(1.8rem,4.5vw,2.2rem);font-weight:800}
+#equipe .plaque h2{font-size:clamp(1.4rem,4.5vw,1.5rem)}
+.exhibit > p:first-child{font-size:1.35rem}
+.label{border-top-color:var(--oya)}
+.label h3,.timeline h3{font-size:1.3rem}
+.label p{font-size:1.1rem}
+.timeline .year{font-size:1.5rem}
+.timeline li::before{background:var(--oya);border-color:var(--brass-soft)}
+.btn{font-size:1.1rem}
+
+/* ===== salas vibrantes: vermelho Oyá, sem marfim e sem faixas ===== */
+.hero{background:radial-gradient(ellipse 80% 70% at 50% 0%,rgba(226,52,40,.6),transparent 72%),linear-gradient(#2A0C0A,#0F0A07)}
+.room.dark{background:radial-gradient(ellipse 55% 45% at 50% 0%,rgba(226,52,40,.3),transparent 70%),repeating-linear-gradient(90deg,rgba(255,255,255,.02) 0 2px,transparent 2px 120px),linear-gradient(#1C120D,#120B08)}
+#cortejo,#linha{background:radial-gradient(ellipse 55% 45% at 50% 0%,rgba(255,110,120,.22),transparent 70%),repeating-linear-gradient(90deg,rgba(255,255,255,.03) 0 2px,transparent 2px 120px),linear-gradient(#6B1320,#2E0912)}
+.room.light{color:#fff;background:radial-gradient(ellipse 60% 45% at 50% 0%,rgba(255,120,90,.35),transparent 70%),repeating-linear-gradient(90deg,rgba(255,255,255,.04) 0 2px,transparent 2px 120px),linear-gradient(#C42A22,#8F1519)}
+.light .exhibit p{color:#fff}
+.light .plaque{background:rgba(15,10,7,.4);border-color:rgba(255,255,255,.55);border-top-color:#fff}
+.light .plaque .room-no{color:#FFD3C8}
+.light .label{border-top-color:#fff}
+.light .gallery figcaption{background:rgba(15,10,7,.45);color:#fff;border-color:rgba(255,255,255,.55)}
+.light .frame{box-shadow:0 14px 28px rgba(0,0,0,.4)}
+.school,.team li{color:#fff}
+.team li{border-bottom-color:rgba(255,255,255,.6)}
+.light details{border-bottom-color:rgba(255,255,255,.4)}
+.hero::after,.room::after,.room.light::after{height:12px;background:#0F0A07;border-top:2px solid rgba(255,255,255,.85)}
+
+/* ===== azul petróleo e ouro ===== */
+:root{--wall:#0A2A35;--frame:#04141A;--oya:#2BB5C6;--ink:#0A2A35;--ink-soft:#3F6470;--txt:#EEF7F8;--muted:#A9C7CD}
+.hero{background:radial-gradient(ellipse 80% 70% at 50% 0%,rgba(43,181,198,.55),transparent 72%),linear-gradient(#0B3340,#04141A)}
+.room.dark{background:radial-gradient(ellipse 55% 45% at 50% 0%,rgba(43,181,198,.28),transparent 70%),repeating-linear-gradient(90deg,rgba(255,255,255,.025) 0 2px,transparent 2px 120px),linear-gradient(#0A2A35,#061A22)}
+#cortejo,#linha{background:radial-gradient(ellipse 55% 45% at 50% 0%,rgba(130,225,235,.22),transparent 70%),repeating-linear-gradient(90deg,rgba(255,255,255,.03) 0 2px,transparent 2px 120px),linear-gradient(#0B5068,#062B3A)}
+.room.light{background:radial-gradient(ellipse 60% 45% at 50% 0%,rgba(130,240,240,.3),transparent 70%),repeating-linear-gradient(90deg,rgba(255,255,255,.04) 0 2px,transparent 2px 120px),linear-gradient(#0F7C8C,#0A4F61)}
+.plaque{background:rgba(4,20,26,.55)}
+.light .plaque{background:rgba(4,20,26,.4)}
+.light .plaque .room-no{color:#C9F4F7}
+.gallery figcaption,.light .gallery figcaption{background:rgba(4,20,26,.55)}
+.screen .slot{background:radial-gradient(ellipse at 50% 0%,#14566A,#04141A)}
+.mat{background:#F2F7F7}
+.slot{background:radial-gradient(ellipse at 50% 0%,#fff,#DCEAEC);border-color:#8FB3B9}
+.screen .slot{border-color:var(--brass)}
+.hero::after,.room::after,.room.light::after{background:#04141A}
+
+/* ===== volta ao carvão e ouro; sem vermelho ===== */
+:root{--wall:#1C120D;--frame:#0F0A07;--txt:#F6EDE0;--muted:#CDB9A3}
+.hero{background:radial-gradient(ellipse 70% 60% at 50% 0%,rgba(242,197,92,.24),transparent 70%),linear-gradient(#1F1510,#0F0A07)}
+.room.dark{background:radial-gradient(ellipse 55% 45% at 50% 0%,rgba(242,197,92,.14),transparent 70%),repeating-linear-gradient(90deg,rgba(255,255,255,.02) 0 2px,transparent 2px 120px),linear-gradient(#1C120D,#120B08)}
+.plaque{background:rgba(15,10,7,.55)}
+.gallery figcaption{background:rgba(15,10,7,.55)}
+.hero::after,.room::after,.room.light::after{background:#0F0A07}
+
+/* ===== vibe black: preto, azul meia-noite e ouro ===== */
+:root{--wall:#0B0B10;--frame:#050508;--oya:#2FBF8F;--txt:#F4F1EA;--muted:#B8B5BF}
+nav{background:rgba(5,5,8,.88);backdrop-filter:blur(10px)}
+.hero{background:radial-gradient(circle 320px at var(--mx,50%) var(--my,35%),rgba(242,197,92,.16),transparent 70%),radial-gradient(ellipse 70% 60% at 50% 0%,rgba(47,191,143,.22),transparent 70%),linear-gradient(#071A15,#050508)}
+.hero .door{isolation:isolate}
+.hero .door::after{content:"3MC";position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:-1;pointer-events:none;font-family:var(--head);font-weight:800;font-size:clamp(8rem,28vw,19rem);line-height:1;color:transparent;-webkit-text-stroke:1px rgba(242,197,92,.14)}
+.hero h1 span{color:#F2C55C;background:linear-gradient(90deg,#F2C55C,#FFF1BF 50%,#D9A22E);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.room.dark{background:radial-gradient(ellipse 55% 45% at 50% 0%,rgba(242,197,92,.12),transparent 70%),repeating-linear-gradient(90deg,rgba(255,255,255,.02) 0 2px,transparent 2px 120px),linear-gradient(#0B0B10,#050508)}
+#cortejo,#linha{background:radial-gradient(ellipse 55% 45% at 50% 0%,rgba(47,191,143,.2),transparent 70%),repeating-linear-gradient(90deg,rgba(255,255,255,.025) 0 2px,transparent 2px 120px),linear-gradient(#0E0E16,#030305)}
+.room.light{background:radial-gradient(ellipse 60% 45% at 50% 0%,rgba(60,210,160,.3),transparent 70%),repeating-linear-gradient(90deg,rgba(255,255,255,.035) 0 2px,transparent 2px 120px),linear-gradient(#0C4A3A,#04211A)}
+.plaque{background:rgba(5,5,8,.6);backdrop-filter:blur(6px);border-top-color:var(--brass)}
+.light .plaque{background:rgba(2,14,10,.5);border-top-color:var(--brass-soft)}
+.light .plaque .room-no{color:#BFF2DF}
+.label,.light .label{border-top-color:var(--brass)}
+.gallery figcaption{background:rgba(5,5,8,.6)}
+.light .gallery figcaption{background:rgba(2,14,10,.55)}
+.frame{box-shadow:0 0 0 1px rgba(242,197,92,.35),0 24px 50px rgba(0,0,0,.6)}
+.light .frame{box-shadow:0 0 0 1px rgba(242,197,92,.35),0 24px 50px rgba(0,0,0,.5)}
+.screen .slot{background:radial-gradient(ellipse at 50% 0%,#0F4A39,#050508)}
+.hero::after,.room::after,.room.light::after{background:#050508;border-top:2px solid var(--brass)}
+@keyframes pulseGold{0%,100%{box-shadow:0 0 0 0 rgba(242,197,92,.45)}50%{box-shadow:0 0 0 12px rgba(242,197,92,0)}}
+.btn{animation:pulseGold 2.6s infinite}
+@media (prefers-reduced-motion:reduce){.btn{animation:none}}
+
+/* ===== preto e branco fraco, com ouro ===== */
+:root{--oya:#D9A22E}
+.hero{background:radial-gradient(circle 320px at var(--mx,50%) var(--my,35%),rgba(242,197,92,.16),transparent 70%),radial-gradient(ellipse 70% 60% at 50% 0%,rgba(242,197,92,.14),transparent 70%),linear-gradient(#0E0E12,#050508)}
+#cortejo,#linha{background:radial-gradient(ellipse 55% 45% at 50% 0%,rgba(242,197,92,.12),transparent 70%),repeating-linear-gradient(90deg,rgba(255,255,255,.025) 0 2px,transparent 2px 120px),linear-gradient(#0E0E12,#030305)}
+.room.light{color:#14141A;background:radial-gradient(ellipse 60% 45% at 50% 0%,rgba(255,255,255,.9),transparent 70%),repeating-linear-gradient(90deg,rgba(0,0,0,.03) 0 2px,transparent 2px 120px),linear-gradient(#F7F6F3,#E9E8E4)}
+.light .exhibit p{color:#14141A}
+.light .plaque{background:#fff;border-color:var(--brass);border-top-color:var(--brass)}
+.light .plaque .room-no{color:#8A6516}
+.light .gallery figcaption{background:#fff;color:#14141A;border-color:var(--brass)}
+.light .frame{box-shadow:0 0 0 1px rgba(217,162,46,.5),0 18px 36px rgba(0,0,0,.25)}
+.school,.team li{color:#14141A}
+.team li{border-bottom-color:var(--brass)}
+.light details{border-bottom-color:rgba(217,162,46,.6)}
+.mat{background:#F4F2EE}
+.screen .slot{background:radial-gradient(ellipse at 50% 0%,#2A2A32,#050508)}
+
+/* ===== branco mais fraco e quente ===== */
+.room.light{background:radial-gradient(ellipse 60% 45% at 50% 0%,rgba(255,250,235,.55),transparent 70%),repeating-linear-gradient(90deg,rgba(60,40,0,.035) 0 2px,transparent 2px 120px),linear-gradient(#ECE6D6,#DCD4BF)}
+.light .plaque,.light .gallery figcaption{background:#F6F1E3}
+.mat{background:#EFE9DA}
+
+/* ===== cinza pedra ===== */
+.room.light{background:radial-gradient(ellipse 60% 45% at 50% 0%,rgba(255,255,255,.35),transparent 70%),repeating-linear-gradient(90deg,rgba(0,0,0,.035) 0 2px,transparent 2px 120px),linear-gradient(#CFCECB,#B9B8B4)}
+.light .plaque,.light .gallery figcaption{background:#E6E5E2}
+.mat{background:#E2E1DD}
+.slot{background:radial-gradient(ellipse at 50% 0%,#F4F4F2,#D2D1CD);border-color:#8E8D89}
+
+/* ===== grafite profundo ===== */
+.room.light{color:#F4F1EA;background:radial-gradient(ellipse 60% 45% at 50% 0%,rgba(255,255,255,.1),transparent 70%),repeating-linear-gradient(90deg,rgba(255,255,255,.025) 0 2px,transparent 2px 120px),linear-gradient(#34343A,#1B1B20)}
+.light .exhibit p{color:#F4F1EA}
+.light .plaque{background:rgba(10,10,12,.55);border-color:var(--brass);border-top-color:var(--brass-soft)}
+.light .plaque .room-no{color:var(--brass-soft)}
+.light .gallery figcaption{background:rgba(10,10,12,.55);color:#F4F1EA;border-color:var(--brass)}
+.light .frame{box-shadow:0 0 0 1px rgba(242,197,92,.35),0 24px 50px rgba(0,0,0,.55)}
+.school,.team li{color:#F4F1EA}
+.light details{border-bottom-color:rgba(242,197,92,.45)}
+
+/* ===== destaques ===== */
+.exhibit strong{color:var(--brass-soft);font-weight:700}
+.plaque h2{background:linear-gradient(90deg,#F2C55C,#FFF1BF 60%,#D9A22E);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:#F2C55C}
+.label h3,.exhibit h3.sub-h{color:var(--brass-soft)}
+.timeline h3{font-size:1.45rem}
+.credits h3{color:var(--brass-soft);text-transform:uppercase;letter-spacing:.2em;font-family:var(--body);font-size:.95rem;font-weight:700;display:flex;align-items:center;gap:.8rem}
+.credits h3::after{content:"";flex:1;height:1px;background:var(--brass)}
+.school{font-size:1.9rem;color:var(--brass-soft)}
+.team li{font-size:1.5rem;font-weight:700;padding:.7rem 1rem;background:rgba(10,10,12,.55);border:1px solid var(--brass);border-left:5px solid var(--brass-soft);border-radius:2px;color:#fff;box-shadow:0 8px 20px rgba(0,0,0,.35)}
+@media (max-width:600px){.team li{font-size:1.1rem;padding:.5rem .7rem}}
+
+/* ===== links do topo ===== */
+nav{gap:.35rem}
+nav a{font-size:1rem;font-weight:600;color:#E8E2D2;padding:.4rem .85rem;border:1px solid transparent;border-radius:999px;transition:color .2s,border-color .2s,background .2s}
+nav a:hover{color:var(--brass-soft)}
+nav a.active{color:#1A0F08;background:linear-gradient(90deg,#F2C55C,#E0AE3E);border-color:#F2C55C}
+
+/* ===== EXTRAS: efeitos premium ===== */
+nav{background:rgba(15,10,7,.78);-webkit-backdrop-filter:blur(14px) saturate(1.4);backdrop-filter:blur(14px) saturate(1.4)}
+.hero{overflow:hidden;isolation:isolate}
+#fx{position:absolute;inset:0;width:100%;height:100%;z-index:0;pointer-events:none}
+.hero .door{z-index:2}
+.hero .spot{position:absolute;inset:0;z-index:1;pointer-events:none;background:radial-gradient(420px circle at var(--mx,50%) var(--my,35%),rgba(242,197,92,.20),transparent 65%);transition:background .15s}
+.hero h1 span{background:linear-gradient(100deg,var(--brass) 20%,#fff3c4 45%,var(--brass-soft) 55%,var(--brass) 80%);background-size:250% 100%;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent;animation:shine 5s linear infinite}
+@keyframes shine{from{background-position:150% 0}to{background-position:-100% 0}}
+.hero .door{animation:breathe 6s ease-in-out infinite}
+@keyframes breathe{0%,100%{box-shadow:0 0 0 rgba(242,197,92,0)}50%{box-shadow:0 0 60px rgba(242,197,92,.22)}}
+.btn{position:relative;overflow:hidden}
+.btn::after{content:"";position:absolute;top:0;left:-70%;width:50%;height:100%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.55),transparent);transform:skewX(-20deg);animation:sweep 3.6s ease-in-out infinite}
+@keyframes sweep{0%,55%{left:-70%}100%{left:130%}}
+.frame{transition:transform .25s ease,box-shadow .25s ease;transform-style:preserve-3d;will-change:transform}
+.plaque{position:relative;overflow:hidden;transition:transform .3s ease,box-shadow .3s ease}
+.plaque::before{content:"";position:absolute;inset:0;pointer-events:none;opacity:0;transition:opacity .3s;background:radial-gradient(260px circle at var(--px,50%) var(--py,50%),rgba(242,197,92,.28),transparent 70%)}
+.plaque:hover::before{opacity:1}
+.plaque:hover{transform:translateY(-4px)}
+.label{transition:transform .3s ease,border-color .3s}
+.label:hover{transform:translateX(6px)}
+.timeline li{transition:opacity .5s,transform .5s}
+.timeline li::before{transition:box-shadow .5s,background .5s,transform .5s}
+.js .timeline li:not(.lit){opacity:.45}
+.timeline li.lit::before{box-shadow:0 0 0 6px rgba(242,197,92,.25),0 0 22px rgba(242,197,92,.9);transform:scale(1.2)}
+.team li{transition:transform .25s,box-shadow .25s,border-color .25s}
+.team li:hover{transform:translateX(8px) scale(1.02);box-shadow:0 12px 28px rgba(217,162,46,.28)}
+#top{position:fixed;right:18px;bottom:calc(18px + env(safe-area-inset-bottom,0px));z-index:8;width:48px;height:48px;border-radius:50%;border:1px solid var(--brass);background:rgba(15,10,7,.85);color:var(--brass-soft);font-size:1.3rem;cursor:pointer;opacity:0;transform:translateY(16px);pointer-events:none;transition:opacity .3s,transform .3s,background .2s,color .2s;-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
+#top.show{opacity:1;transform:none;pointer-events:auto}
+#top:hover{background:var(--brass);color:#1A0F08}
+#prog{box-shadow:0 0 12px var(--brass-soft)}
+@media (prefers-reduced-motion:reduce){.hero h1 span,.hero .door,.btn::after{animation:none}}
+</style>
+</head>
+<body>
+<div id="prog"></div>
+
+<nav aria-label="Seções do site">
+  <b>Museu Virtual 3MC</b>
+  <a href="#projeto">O projeto</a>
+  <a href="#piraja">Pirajá</a>
+  <a href="#oya">Instituto Oyá</a>
+  <a href="#cortejo">Cortejo Afro</a>
+  <a href="#video">Entrevistas</a>
+  <a href="#linha">Linha do tempo</a>
+  <a href="#galeria">Fotos</a>
+  <a href="#equipe">Equipe</a>
+</nav>
+
+<header class="hero">
+  <div class="door">
+    <p class="tag">Museu Virtual da turma 3MC</p>
+    <h1>Pirajá, <span>Território Ancestral</span></h1>
+    <p class="sub">História, cultura e memória afro-indígena, contadas por quem vive o bairro.</p>
+    <a class="btn" href="#projeto">Entrar no museu</a>
+  </div>
+</header>
+
+<section id="projeto" class="room light">
+  <div class="wrap room-grid">
+    <aside class="plaque"><p class="room-no">Sala 1</p><h2>O projeto</h2></aside>
+    <div class="exhibit">
+      <p>Memórias do <strong>Instituto Oyá</strong> e do <strong>Cortejo Afro</strong> para valorizar a história de Pirajá.</p>
+      <div class="two">
+        <div class="label"><h3>Como fizemos</h3><p>Entrevistamos pessoas do Instituto, do Cortejo e do bairro.</p></div>
+        <div class="label"><h3>O que você vai ver</h3><p>Vídeo, fotos e histórias de Pirajá.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="piraja" class="room dark">
+  <div class="wrap room-grid">
+    <aside class="plaque"><p class="room-no">Sala 2</p><h2>Pirajá, território ancestral</h2></aside>
+    <div class="exhibit">
+      <p>Pirajá, no Subúrbio Ferroviário de Salvador, foi território <strong>tupinambá</strong> e abrigou resistências como o <strong>Quilombo do Urubu</strong>, de Zeferina.</p>
+      <p>Foi palco da <strong>Batalha de Pirajá (1822)</strong>, a maior da Independência da Bahia. Hoje abriga o Cortejo Afro e o Instituto Oyá.</p>
+      <div class="gallery">
+        <figure><div class="frame"><div class="mat"><div class="slot">Espaço para foto</div></div></div><figcaption>Foto do bairro</figcaption></figure>
+        <figure><div class="frame"><div class="mat"><div class="slot">Espaço para foto</div></div></div><figcaption>Foto antiga do bairro</figcaption></figure>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="oya" class="room light">
+  <div class="wrap room-grid">
+    <aside class="plaque"><p class="room-no">Sala 3</p><h2>Instituto Oyá</h2></aside>
+    <div class="exhibit">
+      <p>Fundado em <strong>1998</strong> (algumas fontes citam 1990) no terreiro Ilê Axé Oyá, pela Ialorixá <strong>Mãe Santinha de Oyá</strong>, apoia crianças e jovens do bairro. Oyá é a orixá dos ventos e tempestades, também chamada Iansã.</p>
+      <div class="two">
+        <div class="label"><h3>Projetos sociais e culturais</h3><p>Oyá Educa, Criativa e Social: percussão, teatro, capoeira e reforço escolar.</p></div>
+        <div class="label"><h3>Importância para a comunidade</h3><p>Arte e educação que fortalecem a autoestima da comunidade.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="cortejo" class="room dark">
+  <div class="wrap room-grid">
+    <aside class="plaque"><p class="room-no">Sala 4</p><h2>Cortejo Afro</h2></aside>
+    <div class="exhibit">
+      <p>Nasceu em <strong>1998</strong>, em Pirajá, idealizado por <strong>Alberto Pitta</strong>, filho de Mãe Santinha, para valorizar a cultura afro-brasileira no Carnaval.</p>
+      <div class="two">
+        <div class="label"><h3>Ancestralidade na festa</h3><p>Percussão, figurinos e branco sobre branco.</p></div>
+        <div class="label"><h3>Identidade e resistência</h3><p>A cultura negra no centro da festa fortalece o orgulho da identidade.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="video" class="room light">
+  <div class="wrap room-grid">
+    <aside class="plaque"><p class="room-no">Sala 5</p><h2>As entrevistas</h2></aside>
+    <div class="exhibit">
+      <p>Assista às conversas que fizemos para o museu.</p>
+      <div class="frame screen"><div class="slot">Aqui entra o vídeo das entrevistas</div></div>
+
+      <h3 class="sub-h">Perguntas que fizemos</h3>
+      <p>Perguntas pensadas para a experiência de cada pessoa.</p>
+      <details>
+        <summary>Fundador(a) ou responsável pelo Instituto Oyá</summary>
+        <ul><li>Como surgiu o Instituto Oyá e o que motivou sua criação?</li><li>Qual é o significado do nome Oyá?</li><li>Qual conquista mais marcou sua história?</li><li>Que mensagem você deixaria para os jovens?</li></ul>
+      </details>
+      <details>
+        <summary>Quem atua nos projetos sociais do Instituto</summary>
+        <ul><li>Quais atividades você desenvolve com a comunidade?</li><li>Como elas contribuem para a vida dos moradores?</li><li>Qual experiência marcante você viveu nesse trabalho?</li></ul>
+      </details>
+      <details>
+        <summary>Pessoas ligadas ao Cortejo Afro</summary>
+        <ul><li>Como surgiu o Cortejo Afro e qual era sua proposta inicial?</li><li>O que o bloco representa para a cultura afro-brasileira?</li><li>Como o bloco ajuda a combater o racismo e valorizar a identidade negra?</li></ul>
+      </details>
+      <details>
+        <summary>Moradores antigos de Pirajá</summary>
+        <ul><li>Como era o bairro antigamente?</li><li>Quais mudanças você viu ao longo dos anos?</li><li>O que você gostaria que os jovens soubessem sobre a história de Pirajá?</li></ul>
+      </details>
+      <details>
+        <summary>Quem já participou dos projetos do Instituto</summary>
+        <ul><li>De quais projetos você participou?</li><li>Sua participação trouxe alguma mudança para sua vida?</li><li>Qual lembrança mais marcante você guarda?</li></ul>
+      </details>
+      <details>
+        <summary>Artistas, músicos e dançarinos do Cortejo Afro</summary>
+        <ul><li>O que a cultura afro-brasileira representa para você?</li><li>A arte pode ser uma forma de resistência contra o racismo? Por quê?</li><li>Como garantir que essas tradições continuem nas próximas gerações?</li></ul>
+      </details>
+    </div>
+  </div>
+</section>
+
+<section id="linha" class="room dark">
+  <div class="wrap room-grid">
+    <aside class="plaque"><p class="room-no">Sala 6</p><h2>Linha do tempo</h2></aside>
+    <div class="exhibit">
+      <p>Marcos da história de Pirajá, dos tupinambás até hoje.</p>
+      <ol class="timeline">
+        <li><span class="year">Antes da colonização</span><h3>Território tupinambá</h3><p>Pirajá era território do povo tupinambá.</p></li>
+        <li><span class="year">Período colonial</span><h3>Aldeamentos jesuítas</h3><p>Aldeamentos jesuítas e resistência indígena.</p></li>
+        <li><span class="year">1822</span><h3>Batalha de Pirajá</h3><p>A maior batalha da Independência da Bahia.</p></li>
+        <li><span class="year">1826</span><h3>Quilombo do Urubu</h3><p>Liderado por Zeferina, virou símbolo da resistência negra.</p></li>
+        <li><span class="year">1998</span><h3>Instituto Oyá e Cortejo Afro</h3><p>Nascem no terreiro Ilê Axé Oyá o Instituto Oyá e o Cortejo Afro.</p></li>
+        <li><span class="year">Hoje</span><h3>Memória que continua</h3><p>Cortejo Afro e Instituto Oyá seguem formando jovens.</p></li>
+      </ol>
+    </div>
+  </div>
+</section>
+
+<section id="galeria" class="room light">
+  <div class="wrap room-grid">
+    <aside class="plaque"><p class="room-no">Sala 7</p><h2>Galeria de fotos</h2></aside>
+    <div class="exhibit">
+      <p>Fotos das pessoas entrevistadas e de Pirajá.</p>
+      <div class="gallery">
+        <figure><div class="frame"><div class="mat"><div class="slot">Espaço para foto</div></div></div><figcaption>Foto 1</figcaption></figure>
+        <figure><div class="frame"><div class="mat"><div class="slot">Espaço para foto</div></div></div><figcaption>Foto 2</figcaption></figure>
+        <figure><div class="frame"><div class="mat"><div class="slot">Espaço para foto</div></div></div><figcaption>Foto 3</figcaption></figure>
+        <figure><div class="frame"><div class="mat"><div class="slot">Espaço para foto</div></div></div><figcaption>Foto 4</figcaption></figure>
+        <figure><div class="frame"><div class="mat"><div class="slot">Espaço para foto</div></div></div><figcaption>Foto 5</figcaption></figure>
+        <figure><div class="frame"><div class="mat"><div class="slot">Espaço para foto</div></div></div><figcaption>Foto 6</figcaption></figure>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="equipe" class="room light">
+  <div class="wrap room-grid">
+    <aside class="plaque"><p class="room-no">Créditos</p><h2>Equipe e agradecimentos</h2></aside>
+    <div class="exhibit credits">
+      <p class="school">Colégio Estadual Alberto Santos Dumont</p>
+      <h3>Professores</h3>
+      <ul class="team"><li>Fabiana</li><li>Sulivan</li></ul>
+      <h3>Alunos do 3MC</h3>
+      <ul class="team">
+        <li>Gabriella Santos</li><li>Érica Oliveira</li><li>Beatriz Moraes</li>
+        <li>Marlon Factum</li><li>Israel Ferreira</li><li>Carlos Henrique</li><li>Nicolas Gabriel</li>
+      </ul>
+      <p style="margin-top:1.6rem">Agradecemos a quem compartilhou histórias e memórias.</p>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <span class="thanks">Obrigado pela visita</span>
+  Turma 3MC · Museu Virtual de História, Cultura e Memória
+  <small>Pirajá, Território Ancestral</small>
+</footer>
+
+<script>
+(function(){
+  var nav=document.querySelector('nav');
+  var reduce=window.matchMedia&&window.matchMedia('(prefers-reduced-motion:reduce)').matches;
+  document.addEventListener('click',function(e){
+    var a=e.target.closest&&e.target.closest('a[href^="#"]');
+    if(!a)return;
+    var id=a.getAttribute('href').slice(1);
+    var el=id&&document.getElementById(id);
+    if(!el)return;
+    e.preventDefault();
+    var off=nav?nav.offsetHeight:0;
+    var y=el.getBoundingClientRect().top+window.pageYOffset-off;
+    window.scrollTo({top:Math.max(y,0),behavior:reduce?'auto':'smooth'});
+    try{history.replaceState(null,'','#'+id);}catch(err){}
+  });
+
+  var links=[].slice.call(document.querySelectorAll('nav a[href^="#"]'));
+  var secs=links.map(function(a){return document.getElementById(a.getAttribute('href').slice(1));});
+  var bar=document.getElementById('prog');
+  function onScroll(){
+    var h=document.documentElement,max=h.scrollHeight-h.clientHeight;
+    if(bar&&max>0)bar.style.width=(window.pageYOffset/max*100)+'%';
+    var off=(nav?nav.offsetHeight:0)+90,cur=-1;
+    for(var i=0;i<secs.length;i++){if(secs[i]&&secs[i].getBoundingClientRect().top<=off)cur=i;}
+    links.forEach(function(a,i){a.classList.toggle('active',i===cur);});
+  }
+  window.addEventListener('scroll',onScroll,{passive:true});onScroll();
+  if('IntersectionObserver' in window&&!reduce){
+    var items=document.querySelectorAll('.plaque,.exhibit > p,.label,.gallery figure,.screen,.timeline li,.credits h3,.team');
+    document.documentElement.classList.add('js');
+    var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target);}});},{threshold:.08});
+    items.forEach(function(el){el.classList.add('reveal');io.observe(el);});
+  }
+
+  function idx(){var off=(nav?nav.offsetHeight:0)+90,c=-1;for(var i=0;i<secs.length;i++){if(secs[i]&&secs[i].getBoundingClientRect().top<=off)c=i;}return c;}
+  function go(i){
+    var y=0;
+    if(i>=secs.length)return;
+    if(i>=0&&secs[i])y=secs[i].getBoundingClientRect().top+window.pageYOffset-(nav?nav.offsetHeight:0);
+    window.scrollTo({top:Math.max(y,0),behavior:reduce?'auto':'smooth'});
+  }
+  document.addEventListener('keydown',function(e){
+    if(e.altKey||e.ctrlKey||e.metaKey)return;
+    if(e.key==='ArrowRight'){e.preventDefault();go(idx()+1);}
+    else if(e.key==='ArrowLeft'){e.preventDefault();go(idx()-1);}
+    else if(e.key==='f'||e.key==='F'){try{if(document.fullscreenElement)document.exitFullscreen();else document.documentElement.requestFullscreen();}catch(err){}}
+  });
+
+  var hero=document.querySelector('.hero');
+  if(hero&&!reduce){hero.addEventListener('mousemove',function(e){var b=hero.getBoundingClientRect();hero.style.setProperty('--mx',(e.clientX-b.left)+'px');hero.style.setProperty('--my',(e.clientY-b.top)+'px');});}
+})();
+</script>
+
+<button id="top" aria-label="Voltar ao topo" title="Voltar ao topo">↑</button>
+<script>
+(function(){
+  var reduce=matchMedia('(prefers-reduced-motion:reduce)').matches;
+  var fine=matchMedia('(hover:hover) and (pointer:fine)').matches;
+  var hero=document.querySelector('.hero');
+
+  /* partículas douradas no hero */
+  if(hero&&!reduce){
+    var cv=document.createElement('canvas');cv.id='fx';hero.insertBefore(cv,hero.firstChild);
+    var sp=document.createElement('div');sp.className='spot';hero.insertBefore(sp,cv.nextSibling);
+    var c=cv.getContext('2d'),W,H,P=[],N=46,vis=true;
+    function size(){W=cv.width=hero.clientWidth;H=cv.height=hero.clientHeight}
+    function mk(init){return{x:Math.random()*W,y:init?Math.random()*H:H+10,r:Math.random()*2.2+.6,v:Math.random()*.5+.15,d:Math.random()*Math.PI*2,a:Math.random()*.5+.3}}
+    size();for(var i=0;i<N;i++)P.push(mk(true));
+    addEventListener('resize',size);
+    new IntersectionObserver(function(e){vis=e[0].isIntersecting}).observe(hero);
+    (function loop(t){
+      if(vis){c.clearRect(0,0,W,H);
+        P.forEach(function(q,i){q.y-=q.v;q.x+=Math.sin(t/1200+q.d)*.35;if(q.y<-10)P[i]=mk(false);
+          var g=c.createRadialGradient(q.x,q.y,0,q.x,q.y,q.r*4);
+          g.addColorStop(0,'rgba(255,230,150,'+q.a+')');g.addColorStop(1,'rgba(242,197,92,0)');
+          c.fillStyle=g;c.beginPath();c.arc(q.x,q.y,q.r*4,0,7);c.fill()})}
+      requestAnimationFrame(loop)})(0);
+    if(fine)hero.addEventListener('mousemove',function(e){var b=hero.getBoundingClientRect();
+      hero.style.setProperty('--mx',(e.clientX-b.left)+'px');hero.style.setProperty('--my',(e.clientY-b.top)+'px')});
+  }
+
+  /* inclinação 3D nas molduras + luz nos cards */
+  if(fine&&!reduce){
+    document.querySelectorAll('.frame').forEach(function(f){
+      f.addEventListener('mousemove',function(e){var b=f.getBoundingClientRect();
+        var x=(e.clientX-b.left)/b.width-.5,y=(e.clientY-b.top)/b.height-.5;
+        f.style.transform='perspective(800px) rotateY('+(x*10)+'deg) rotateX('+(-y*10)+'deg) translateY(-5px) scale(1.02)'});
+      f.addEventListener('mouseleave',function(){f.style.transform=''})});
+    document.querySelectorAll('.plaque').forEach(function(p){
+      p.addEventListener('mousemove',function(e){var b=p.getBoundingClientRect();
+        p.style.setProperty('--px',(e.clientX-b.left)+'px');p.style.setProperty('--py',(e.clientY-b.top)+'px')})});
+  }
+
+  /* linha do tempo acende ao rolar */
+  var lis=document.querySelectorAll('.timeline li');
+  if('IntersectionObserver' in window){
+    var tio=new IntersectionObserver(function(es){es.forEach(function(e){e.target.classList.toggle('lit',e.isIntersecting)})},{rootMargin:'-35% 0px -35% 0px'});
+    lis.forEach(function(l){tio.observe(l)});
+  }else lis.forEach(function(l){l.classList.add('lit')});
+
+  /* voltar ao topo */
+  var tb=document.getElementById('top');
+  function chk(){tb.classList.toggle('show',scrollY>600)}
+  addEventListener('scroll',chk,{passive:true});chk();
+  tb.addEventListener('click',function(){scrollTo({top:0,behavior:reduce?'auto':'smooth'})});
+})();
+</script>
+
+<style>
+/* ===== EXTRAS 2: entrada, galeria, apresentação ===== */
+body{counter-reset:sala}.room{counter-increment:sala}
+.plaque::after{content:counter(sala,decimal-leading-zero);position:absolute;right:.7rem;bottom:-1rem;font:800 5.5rem/1 var(--head);color:rgba(217,162,46,.14);pointer-events:none}
+#gate{position:fixed;inset:0;z-index:50;display:grid;place-items:center;padding:1.5rem}
+#gate .dl,#gate .dr{position:absolute;top:0;bottom:0;width:50.3%;background:radial-gradient(ellipse at 50% 0%,#3A2216,#0F0A07 70%);transition:transform 1.3s cubic-bezier(.7,0,.2,1)}
+#gate .dl{left:0;border-right:3px solid var(--brass)}#gate .dr{right:0;border-left:3px solid var(--brass)}
+#gate .gc{position:relative;text-align:center;max-width:560px;padding:2.6rem 1.6rem;border:1px solid var(--brass);outline:1px solid rgba(217,162,46,.45);outline-offset:10px;border-radius:140px 140px 0 0;background:rgba(15,10,7,.6);transition:opacity .45s,transform .45s}
+#gate p{margin:0 0 .6rem;font-family:var(--head);letter-spacing:.14em;text-transform:uppercase;font-size:.85rem;color:var(--brass-soft)}
+#gate h2{font-size:clamp(1.8rem,6vw,2.8rem);margin-bottom:1.6rem}
+#gate button{border:0;cursor:pointer;font-size:1.05rem}
+#gate.open .dl{transform:translateX(-101%)}#gate.open .dr{transform:translateX(101%)}
+#gate.open .gc{opacity:0;transform:scale(.9)}
+#dots{position:fixed;right:14px;top:50%;transform:translateY(-50%);z-index:7;display:flex;flex-direction:column;gap:15px}
+#dots a{position:relative;width:13px;height:13px;border-radius:50%;border:2px solid var(--brass);transition:transform .25s,background .25s,box-shadow .25s}
+#dots a.on{background:var(--brass-soft);transform:scale(1.35);box-shadow:0 0 12px var(--brass-soft)}
+#dots a::before{content:attr(data-l);position:absolute;right:24px;top:50%;transform:translateY(-50%);white-space:nowrap;font:600 .8rem var(--body);padding:.2rem .65rem;border-radius:999px;background:rgba(15,10,7,.92);border:1px solid var(--brass);color:var(--txt);opacity:0;pointer-events:none;transition:opacity .2s}
+#dots a:hover::before{opacity:1}
+@media (max-width:900px){#dots{display:none}}
+.gallery .frame{cursor:zoom-in}
+#lb{position:fixed;inset:0;z-index:40;background:rgba(8,5,3,.94);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);display:grid;grid-template-columns:auto 1fr auto;grid-template-rows:1fr auto;align-items:center;gap:.5rem;padding:1rem;animation:lbin .3s ease}
+#lb[hidden]{display:none}@keyframes lbin{from{opacity:0}}
+#lb button{width:52px;height:52px;border-radius:50%;border:1px solid var(--brass);background:rgba(15,10,7,.8);color:var(--brass-soft);font-size:1.7rem;cursor:pointer;transition:background .2s,color .2s}
+#lb button:hover{background:var(--brass);color:#1A0F08}
+#lb .x{position:absolute;top:14px;right:14px;z-index:2}
+#lb .st{grid-column:2;display:grid;place-items:center;min-height:0;height:100%;padding:10px;border:1px solid var(--brass);background:var(--frame);box-shadow:0 0 70px rgba(242,197,92,.2)}
+#lb .st img,#lb .st video{max-width:100%;max-height:78vh;object-fit:contain}
+#lb .ph{color:var(--muted);font-size:1.3rem;text-align:center}
+#lb .cp{grid-column:1/4;margin:0;text-align:center;font-family:var(--head);color:var(--txt)}
+@media (max-width:600px){#lb{grid-template-columns:1fr 1fr}#lb .st{grid-column:1/3;grid-row:1}#lb .pv{grid-row:2;justify-self:end}#lb .nx{grid-row:2;justify-self:start}#lb .cp{grid-column:1/3;grid-row:3}}
+#pres{position:fixed;left:16px;bottom:calc(18px + env(safe-area-inset-bottom,0px));z-index:8;font:600 .9rem var(--body);padding:.6rem 1rem;border-radius:999px;border:1px solid var(--brass);background:rgba(15,10,7,.88);color:var(--brass-soft);cursor:pointer;-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);transition:background .2s,color .2s}
+#pres:hover,body.pres #pres{background:var(--brass);color:#1A0F08}
+@media (prefers-reduced-motion:reduce){#gate .dl,#gate .dr,#gate .gc{transition-duration:.01s}}
+</style>
+<button id="pres" type="button" title="Setas ou espaço trocam de sala">▶ Apresentar</button>
+<script>
+(function(){
+  var reduce=matchMedia('(prefers-reduced-motion:reduce)').matches,B=reduce?'auto':'smooth';
+  var $=function(q,r){return Array.prototype.slice.call((r||document).querySelectorAll(q))};
+
+  /* entrada do museu */
+  var g=document.createElement('div');g.id='gate';
+  g.innerHTML='<i class="dl"></i><i class="dr"></i><div class="gc"><p>Museu Virtual da turma 3MC</p><h2>Pirajá, Território Ancestral</h2><button class="btn" type="button">Abrir as portas</button></div>';
+  document.body.appendChild(g);document.documentElement.style.overflow='hidden';
+  var gb=g.querySelector('button');gb.focus();
+  gb.addEventListener('click',function(){g.classList.add('open');document.documentElement.style.overflow='';
+    setTimeout(function(){g.remove()},reduce?50:1400)});
+
+  /* pontinhos de navegação */
+  var secs=[document.querySelector('.hero')].concat($('.room')).concat([document.querySelector('footer')]).filter(Boolean);
+  var dots=document.createElement('div');dots.id='dots';dots.setAttribute('aria-label','Salas do museu');
+  var map=[];
+  secs.forEach(function(sec,i){
+    var a=document.createElement('a'),h=sec.querySelector('h1,h2');
+    a.href=sec.id?'#'+sec.id:'#';a.dataset.l=i==0?'Entrada':(sec.tagName=='FOOTER'?'Fim':(h?h.textContent:'Sala '+i));
+    if(!sec.id&&i==0)a.addEventListener('click',function(e){e.preventDefault();scrollTo({top:0,behavior:B})});
+    dots.appendChild(a);map.push(a)});
+  document.body.appendChild(dots);
+  if('IntersectionObserver' in window){
+    var dio=new IntersectionObserver(function(es){es.forEach(function(e){
+      if(e.isIntersecting){map.forEach(function(a){a.classList.remove('on')});map[secs.indexOf(e.target)].classList.add('on')}})},{rootMargin:'-45% 0px -50% 0px'});
+    secs.forEach(function(x){dio.observe(x)});
+  }
+
+  /* galeria em tela cheia */
+  var items=$('.gallery figure'),n=items.length,idx=0;
+  var lb=document.createElement('div');lb.id='lb';lb.hidden=true;lb.setAttribute('role','dialog');lb.setAttribute('aria-modal','true');
+  lb.innerHTML='<button class="x" aria-label="Fechar">×</button><button class="pv" aria-label="Anterior">‹</button><div class="st"></div><button class="nx" aria-label="Próxima">›</button><p class="cp"></p>';
+  document.body.appendChild(lb);
+  var st=lb.querySelector('.st'),cp=lb.querySelector('.cp');
+  function show(i){idx=(i+n)%n;var f=items[idx],m=f.querySelector('img,video');st.innerHTML='';
+    if(m){var c=m.cloneNode(true);if(c.tagName=='VIDEO')c.controls=true;st.appendChild(c)}
+    else st.innerHTML='<div class="ph">Espaço para foto</div>';
+    var fc=f.querySelector('figcaption');cp.textContent=(fc?fc.textContent:'')+'  ·  '+(idx+1)+' / '+n}
+  function open(i){show(i);lb.hidden=false;document.documentElement.style.overflow='hidden';lb.querySelector('.x').focus()}
+  function close(){lb.hidden=true;document.documentElement.style.overflow='';st.innerHTML=''}
+  items.forEach(function(f,i){var fr=f.querySelector('.frame');if(!fr)return;
+    fr.tabIndex=0;fr.setAttribute('role','button');fr.setAttribute('aria-label','Ampliar foto');
+    fr.addEventListener('click',function(){open(i)});
+    fr.addEventListener('keydown',function(e){if(e.key=='Enter'||e.key==' '){e.preventDefault();open(i)}})});
+  lb.querySelector('.x').onclick=close;lb.querySelector('.pv').onclick=function(){show(idx-1)};lb.querySelector('.nx').onclick=function(){show(idx+1)};
+  lb.addEventListener('click',function(e){if(e.target===lb)close()});
+
+  /* modo apresentação */
+  var pb=document.getElementById('pres'),on=false;
+  function cur(){var c=0;secs.forEach(function(x,i){if(x.getBoundingClientRect().top<=140)c=i});return c}
+  function lab(){pb.textContent=on?'■ Sair · '+(cur()+1)+'/'+secs.length:'▶ Apresentar'}
+  function go(d){var i=Math.max(0,Math.min(secs.length-1,cur()+d));
+    if(i==0)scrollTo({top:0,behavior:B});else secs[i].scrollIntoView({behavior:B,block:'start'});setTimeout(lab,500)}
+  function setPres(v){on=v;document.body.classList.toggle('pres',v);
+    if(v&&document.documentElement.requestFullscreen)document.documentElement.requestFullscreen().catch(function(){});
+    if(!v&&document.fullscreenElement)document.exitFullscreen().catch(function(){});lab()}
+  pb.addEventListener('click',function(){setPres(!on)});
+  document.addEventListener('fullscreenchange',function(){if(!document.fullscreenElement&&on)setPres(false)});
+  addEventListener('scroll',function(){if(on)lab()},{passive:true});
+  document.addEventListener('keydown',function(e){
+    if(!lb.hidden){if(e.key=='Escape')close();else if(e.key=='ArrowRight')show(idx+1);else if(e.key=='ArrowLeft')show(idx-1);return}
+    if(!on||e.target.closest&&e.target.closest('summary,button,a'))return;
+    if(['ArrowRight','ArrowDown','PageDown',' '].indexOf(e.key)>-1){e.preventDefault();go(1)}
+    else if(['ArrowLeft','ArrowUp','PageUp'].indexOf(e.key)>-1){e.preventDefault();go(-1)}
+  });
+})();
+</script>
+<style>
+/* ===== AJUSTE: título sem quebrar palavra no celular ===== */
+.hero h1,.hero h1 span,#gate h2{hyphens:none;-webkit-hyphens:none;overflow-wrap:normal;word-break:normal;text-wrap:balance}
+.hero h1 span{padding:0 .08em .06em}
+@media (max-width:600px){
+  .hero .door{padding-left:1rem;padding-right:1rem}
+  .hero .door h1{font-size:clamp(1.9rem,9.5vw,2.7rem);line-height:1.08}
+  #gate .gc{padding:2.4rem 1rem 2rem;outline-offset:6px}
+  #gate h2{font-size:clamp(1.5rem,7.2vw,2rem)}
+}
+@media (max-width:340px){.hero .door h1{font-size:1.75rem}#gate h2{font-size:1.4rem}}
+</style>
+<style>
+/* ===== AJUSTE: títulos das salas sem hífen ===== */
+h1,h2,h3,.plaque h2{hyphens:none;-webkit-hyphens:none;text-wrap:balance}
+.plaque h2{overflow-wrap:break-word;word-break:normal}
+@media (max-width:600px){.plaque h2{font-size:clamp(1.55rem,7vw,1.9rem)}}
+</style>
+</body>
+</html>
